@@ -1,244 +1,318 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>基本情報技術者試験 暗記アプリ</title>
+    <title>基本情報技術者試験 暗記アプリ (V4)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons CDN (アイコン用) -->
+    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
     <style>
-        /* 簡易的なTailwind CSS風のユーティリティクラス（CDNの代わり） */
-        /* 基本スタイル */
-        :root {
-            --primary-color: #3b82f6;
-            --secondary-color: #6b7281;
-            --accent-color: #eab308;
-            --bg-color: #f3f4f6;
-            --text-color: #374151;
-            --card-bg: #ffffff;
-            --correct-bg: #dcfce7;
-            --correct-border: #22c55e;
-            --incorrect-bg: #fee2e2;
-            --incorrect-border: #f87171;
-        }
-
+        /* 基本のフォント設定 */
         body {
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            -webkit-tap-highlight-color: transparent; /* スマホでのタップ時のハイライトを無効化 */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans JP", sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            /* スクロールバーのスタイル（モダンブラウザ用） */
+            scrollbar-width: thin;
+            scrollbar-color: #a0aec0 #edf2f7;
+        }
+        body::-webkit-scrollbar {
+            width: 8px;
+        }
+        body::-webkit-scrollbar-track {
+            background: #edf2f7;
+        }
+        body::-webkit-scrollbar-thumb {
+            background-color: #a0aec0;
+            border-radius: 10px;
+            border: 2px solid #edf2f7;
         }
 
-        *, *::before, *::after {
-            box-sizing: border-box;
+        /* 画面遷移のアニメーション [スマホ対応修正済み] */
+        .screen {
+            width: 100%;
+            max-width: 42rem; /* max-w-2xl */
+            margin: 0 auto;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out, visibility 0.3s;
+            position: absolute;
+            top: 1rem; /* p-4 */
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+        }
+        .screen.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0); /* active時はtranslateXを解除 */
+            position: relative;
+            top: auto;
+            left: auto; /* left: 50% を解除 */
+        }
+        #app-container {
+            position: relative;
+            min-height: 100vh;
         }
 
-        .min-h-screen { min-height: 100vh; }
-        .p-4 { padding: 1rem; }
-        .font-sans { font-family: sans-serif; }
-        .text-center { text-align: center; }
-        .mb-2 { margin-bottom: 0.5rem; }
-        .mb-4 { margin-bottom: 1rem; }
-        .mb-6 { margin-bottom: 1.5rem; }
-        .mb-8 { margin-bottom: 2rem; }
-        .mt-6 { margin-top: 1.5rem; }
-        .space-y-4 > * + * { margin-top: 1rem; }
-        .w-full { width: 100%; }
-        .float-right { float: right; }
-        .flex { display: flex; }
-        .justify-between { justify-content: space-between; }
-        .items-center { align-items: center; }
-        .rounded-lg { border-radius: 0.5rem; }
-        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
-
-        /* テキスト */
-        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
-        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
-        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
-        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
-        .font-bold { font-weight: 700; }
-        .font-semibold { font-weight: 600; }
-        .text-gray-500 { color: #6b7281; }
-        .text-gray-600 { color: #4b5563; }
-        .text-gray-700 { color: #374151; }
-        .text-white { color: #ffffff; }
-        .text-right { text-align: right; }
-
-        /* コンポーネント */
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 0.75rem; /* rounded-xl */
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            padding: 1.5rem;
-            max-width: 600px; /* PCでも見やすいように最大幅を設定 */
-            margin: 1rem auto;
+        /* 主要ボタンのインタラクション強化 */
+        .btn-primary {
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
         }
-
-        .btn {
-            padding: 0.85rem 1.5rem;
-            border: none;
-            border-radius: 0.5rem; /* rounded-lg */
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-            text-align: center;
-            display: block; /* w-fullを確実に効かせるため */
+        .btn-primary:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-
-        .btn:active {
+        .btn-primary:not(:disabled):active {
             transform: translateY(1px);
-            opacity: 0.95;
+            box-shadow: none;
         }
 
-        /* ボタン色 */
-        .btn-primary { background-color: var(--primary-color); color: white; }
-        .btn-secondary { background-color: var(--secondary-color); color: white; }
-        .btn-accent { background-color: var(--accent-color); color: white; }
-
-        /* 選択肢ボタン */
+        /* 選択肢ボタンのアニメーション */
         .btn-option {
-            background-color: #f9fafb; /* bg-gray-50 */
-            color: #374151; /* text-gray-700 */
-            border: 1px solid #d1d5db; /* border-gray-300 */
-            text-align: left;
-            padding: 1rem;
-            font-weight: 500;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, opacity 0.3s ease-out, transform 0.3s ease-out;
+            transition-delay: var(--delay, 0s);
         }
-        .btn-option:hover { background-color: #f3f4f6; /* bg-gray-100 */ }
+        .btn-option.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .btn-option:not(:disabled):hover {
+            background-color: #f3f4f6;
+            transform: translateX(3px);
+        }
+        .btn-option:not(:disabled):active {
+            transform: translateX(1px) translateY(1px);
+        }
 
-        /* 選択肢の回答後スタイル */
+        /* 回答後のスタイル */
         .btn-option.correct {
-            background-color: var(--correct-bg);
-            border-color: var(--correct-border);
-            color: #14532d; /* text-green-900 */
+            background-color: #dcfce7;
+            border-color: #22c55e;
+            color: #166534;
             font-weight: 700;
         }
         .btn-option.incorrect {
-            background-color: var(--incorrect-bg);
-            border-color: var(--incorrect-border);
-            color: #991b1b; /* text-red-800 */
-            opacity: 0.8;
-        }
-        .btn-option:disabled { cursor: not-allowed; }
-
-        .badge {
-            display: inline-block;
-            background-color: #e0e7ff; /* bg-indigo-100 */
-            color: #3730a3; /* text-indigo-800 */
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px; /* rounded-full */
-            font-size: 0.875rem;
-            font-weight: 600;
-        }
-
-        /* 問題文のエリア */
-        #question-area {
-            line-height: 1.7;
-            min-height: 6em;
+            background-color: #fee2e2;
+            border-color: #ef4444;
+            color: #991b1b;
+            opacity: 0.9;
         }
         
-        /* 解説文のエリア */
-        #feedback-explanation {
-            line-height: 1.6;
-            background-color: #f3f4f6;
-            padding: 1rem;
-            border-radius: 0.5rem;
+        /* [★ 修正] 解説エリアのアニメーションとスクロール */
+        #feedback-area {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden; /* 閉じているときは hidden */
+            transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, padding-top 0.4s ease-in-out, padding-bottom 0.4s ease-in-out;
+            padding-top: 0;
+            padding-bottom: 0;
         }
+        #feedback-area.visible {
+            opacity: 1;
+            padding-top: 1.25rem; /* p-5 */
+            padding-bottom: 1.25rem; /* p-5 */
+            
+            /* ★ 最大高さをビューポートの50%に制限 */
+            max-height: 50vh; 
+            
+            /* ★ コンテンツが max-height を超えた場合にスクロールバーを表示 */
+            overflow-y: auto; 
+        }
+        @media (min-width: 768px) {
+            #feedback-area.visible {
+                padding-top: 1.5rem; /* md:p-6 */
+                padding-bottom: 1.5rem; /* md:p-6 */
+            }
+        }
+        /* [★ 修正ここまで] */
 
-        /* 画面切り替え */
-        .screen { display: none; }
-        .screen.active { display: block; }
-
-        /* 汎用クラス */
-        .hidden { display: none !important; }
+        /* 電卓モーダルのアニメーション */
+        .calculator-modal {
+            transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+        }
+        .calculator-modal .bg-white {
+            transform: scale(0.95);
+            opacity: 0;
+            transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+        }
+        .calculator-modal:not(.invisible) .bg-white {
+            transform: scale(1);
+            opacity: 1;
+        }
+        
+        /* 電卓キーの操作感 */
+        .calculator-key {
+            transition: background-color 0.1s ease, transform 0.1s ease;
+        }
+        .calculator-key:active {
+            background-color: #d4d4d4;
+            transform: scale(0.95);
+        }
+        .calculator-key.op:active {
+            background-color: #fb923c;
+            transform: scale(0.95);
+        }
     </style>
 </head>
-<body>
+<body class="bg-gray-100 min-h-screen">
 
     <!-- メインのコンテナ -->
-    <div id="app-container" class="bg-gray-100 min-h-screen p-4 font-sans">
+    <div id="app-container" class="p-4">
 
         <!-- 画面1: ホーム（メニュー）画面 -->
         <div id="home-screen" class="screen active">
-            <div class="card">
-                <h1 class="text-2xl font-bold text-center mb-6">基本情報 暗記アプリ</h1>
-                <p class="text-center text-gray-600 mb-8">モードを選んでください</p>
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-6">
+                    基本情報 暗記アプリ
+                </h1>
+                <p class="text-center text-gray-600 mb-8">モードを選んで学習を開始しましょう</p>
                 
-                <!-- モード選択ボタン -->
                 <div class="space-y-4">
-                    <button data-mode="sequential" class="btn btn-primary w-full">順番にスタート</button>
-                    <button data-mode="random" class="btn btn-secondary w-full">ランダムでスタート</button>
-                    <button data-mode="infinite" class="btn btn-accent w-full">ランダム無限モード</button>
+                    <button data-mode="sequential" class="btn-primary w-full text-lg font-semibold py-3 px-5 bg-blue-600 text-white rounded-lg shadow-md flex items-center justify-center">
+                        <i class="ph ph-play-circle text-2xl mr-2"></i>
+                        順番にスタート
+                    </button>
+                    <button data-mode="random" class="btn-primary w-full text-lg font-semibold py-3 px-5 bg-gray-600 text-white rounded-lg shadow-md flex items-center justify-center">
+                        <i class="ph ph-shuffle text-2xl mr-2"></i>
+                        ランダムでスタート
+                    </button>
+                    <button data-mode="infinite" class="btn-primary w-full text-lg font-semibold py-3 px-5 bg-yellow-500 text-white rounded-lg shadow-md flex items-center justify-center">
+                        <i class="ph ph-infinity text-2xl mr-2"></i>
+                        ランダム無限モード
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- 画面2: クイズ画面 -->
         <div id="quiz-screen" class="screen">
-            <div class="card">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
                 <!-- ヘッダー情報 -->
-                <div class="flex justify-between items-center mb-2">
-                    <span id="quiz-category" class="badge">カテゴリ</span>
-                    <span id="quiz-progress" class="text-gray-500 text-sm">1 / 10</span>
-                </div>
-                <!-- 正答率表示エリア -->
-                <div id="quiz-stats" class="text-sm text-gray-500 mb-4 text-right">
-                    <!-- ここに正答率が動的に表示されます -->
+                <div class="p-4 md:p-5 bg-gray-50 border-b border-gray-200">
+                    <div class="flex justify-between items-center mb-2">
+                        <span id="quiz-category" class="text-xs md:text-sm font-semibold text-blue-800 bg-blue-100 px-3 py-1 rounded-full truncate max-w-[60%]">
+                            カテゴリ
+                        </span>
+                        <div class="flex items-center space-x-2">
+                            <!-- 電卓ボタン -->
+                            <button id="calculator-button" title="電卓" class="text-gray-500 hover:text-blue-600 transition-colors p-1 rounded-full hover:bg-gray-200">
+                                <i class="ph ph-calculator text-2xl"></i>
+                            </button>
+                            <!-- 解説ボタン -->
+                            <button id="toggle-explanation-button" title="解説" class="text-gray-500 hover:text-blue-600 transition-colors p-1 rounded-full hover:bg-gray-200">
+                                <i class="ph ph-info text-2xl"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-baseline">
+                        <span id="quiz-progress" class="text-lg font-bold text-gray-700">1 / 1</span>
+                        <span id="quiz-stats" class="text-xs md:text-sm text-gray-500">初挑戦</span>
+                    </div>
                 </div>
 
                 <!-- 問題文 -->
-                <div id="question-area" class="text-lg font-semibold mb-6">
+                <div id="question-area" class="p-5 md:p-6 min-h-[10rem] text-base md:text-lg text-gray-800 leading-relaxed font-medium">
                     ここに問題文が表示されます...
                 </div>
 
                 <!-- 選択肢コンテナ -->
-                <div id="options-container" class="space-y-4 mb-6">
+                <div id="options-container" class="space-y-3 p-5 md:p-6 bg-gray-50 border-t border-gray-200">
                     <!-- 選択肢ボタンは JavaScript によって動的に生成されます -->
                 </div>
 
-                <!-- フィードバック（正解・不正解・解説）エリア -->
-                <div id="feedback-area" class="hidden">
-                    <div id="feedback-result" class="text-xl font-bold mb-2">
-                        <!-- '正解！' または '不正解...' が表示されます -->
-                    </div>
-                    <div id="feedback-explanation" class="text-gray-700">
-                        <!-- ここに解説文が表示されます -->
+                <!-- フィードバック（解説）エリア -->
+                <div id="feedback-area" class="border-t border-gray-200">
+                    <div class="px-5 md:px-6">
+                        <div id="feedback-result" class="text-2xl font-bold mb-3">
+                            <!-- '正解！' または '不正解...' が表示されます -->
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">解説</h3>
+                        <div id="feedback-explanation" class="text-gray-700 leading-relaxed space-y-2">
+                            <!-- ここに解説文が表示されます -->
+                        </div>
                     </div>
                 </div>
 
                 <!-- ナビゲーションボタン -->
-                <div class="mt-6 flex justify-between">
-                    <button id="home-button" class="btn btn-secondary">ホームに戻る</button>
-                    <button id="next-button" class="btn btn-primary hidden">次へ</button>
+                <div class="p-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center space-x-4">
+                    <button id="prev-button" class="py-2 px-4 text-gray-700 font-semibold bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center">
+                        <i class="ph ph-arrow-left mr-1"></i> 前へ
+                    </button>
+                    <button id="home-button" title="ホームに戻る" class="py-2 px-3 text-gray-600 hover:text-blue-600 transition-colors rounded-lg hover:bg-gray-200">
+                        <i class="ph ph-house text-2xl"></i>
+                    </button>
+                    <button id="next-button" class="btn-primary py-2 px-6 text-white font-semibold bg-blue-600 rounded-lg shadow-md flex items-center opacity-0 invisible transition-all duration-300">
+                        次へ <i class="ph ph-arrow-right ml-1"></i>
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- 画面3: 完了画面 -->
         <div id="result-screen" class="screen">
-            <div class="card text-center">
-                <h2 class="text-2xl font-bold mb-4">お疲れ様でした！</h2>
-                <p id="result-summary" class="text-lg mb-8">10問中 8問正解しました。</p>
-                <div class="space-y-4">
-                    <button id="restart-button" class="btn btn-primary w-full">
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 text-center">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="ph ph-check-circle text-4xl text-green-600"></i>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-4">お疲れ様でした！</h2>
+                <p id="result-summary" class="text-lg text-gray-700 mb-8">1問中 0問正解しました。</p>
+                <div class="space-y-4 max-w-xs mx-auto">
+                    <button id="restart-button" class="btn-primary w-full text-lg font-semibold py-3 px-5 bg-blue-600 text-white rounded-lg shadow-md flex items-center justify-center">
+                        <i class="ph ph-arrow-clockwise text-xl mr-2"></i>
                         もう一度 (<span id="restart-mode-text"></span>)
                     </button>
-                    <button id="back-to-home-button" class="btn btn-secondary w-full">
+                    <button id="back-to-home-button" class="btn-primary w-full text-lg font-semibold py-3 px-5 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-200 flex items-center justify-center">
+                        <i class="ph ph-house text-xl mr-2"></i>
                         ホームに戻る
                     </button>
                 </div>
             </div>
         </div>
+
+    </div> <!-- /#app-container -->
+
+    <!-- 電卓モーダル -->
+    <div id="calculator-modal" class="calculator-modal fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 opacity-0 invisible z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-xs mx-auto overflow-hidden">
+            <!-- 電卓ディスプレイ -->
+            <div id="calc-display" class="text-right text-4xl font-mono p-4 bg-gray-800 text-white overflow-x-auto whitespace-nowrap">
+                0
+            </div>
+            <!-- 電卓キー -->
+            <div class="grid grid-cols-4 gap-px bg-gray-300">
+                <button data-key="AC" class="calculator-key col-span-2 text-lg p-4 bg-gray-200 hover:bg-gray-300 font-semibold text-red-600">AC</button>
+                <button data-key="C" class="calculator-key text-lg p-4 bg-gray-200 hover:bg-gray-300 font-semibold text-blue-600">C</button>
+                <button data-key="/" class="calculator-key op text-2xl p-4 bg-orange-400 text-white hover:bg-orange-500 font-semibold">&divide;</button>
+                
+                <button data-key="7" class="calculator-key text-xl p-4 bg-gray-100 hover:bg-gray-200 font-medium">7</button>
+                <button data-key="8" class="calculator-key text-xl p-4 bg-gray-100 hover:bg-gray-200 font-medium">8</button>
+                <button data-key="9" class="calculator-key text-xl p-4 bg-gray-100 hover:bg-gray-200 font-medium">9</button>
+                <button data-key="*" class="calculator-key op text-2xl p-4 bg-orange-400 text-white hover:bg-orange-500 font-semibold">&times;</button>
+                
+                <button data-key="4" class="calculator-key text-xl p-4 bg-gray-100 hover:bg-gray-200 font-medium">4</button>
+                <button data-key="5" class="calculator-key text-xl p-4 bg-gray-100 hover:bg-gray-200 font-medium">5</button>
+                <button data-key="6" class="calculator-key text-xl p-4 bg-gray-100 hover:bg-gray-200 font-medium">6</button>
+                <button data-key="-" class="calculator-key op text-2xl p-4 bg-orange-400 text-white hover:bg-orange-500 font-semibold">&minus;</button>
+                
+                <button data-key="1" class="calculator-key text-xl p-4 bg-gray-100 hover:bg-gray-200 font-medium">1</button>
+                <button data-key="2" class="calculator-key text-xl p-4 bg-gray-100 hover:bg-gray-200 font-medium">2</button>
+                <button data-key="3" class="calculator-key text-xl p-4 bg-gray-100 hover:bg-gray-200 font-medium">3</button>
+                <button data-key="+" class="calculator-key op text-2xl p-4 bg-orange-400 text-white hover:bg-orange-500 font-semibold">&plus;</button>
+                
+                <button data-key="0" class="calculator-key col-span-2 text-xl p-4 bg-gray-100 hover:bg-gray-200 font-medium">0</button>
+                <button data-key="." class="calculator-key text-xl p-4 bg-gray-100 hover:bg-gray-200 font-medium">.</button>
+                <button data-key="=" class="calculator-key op text-2xl p-4 bg-orange-400 text-white hover:bg-orange-500 font-semibold">&equals;</button>
+            </div>
+        </div>
+        <!-- モーダルを閉じるための背景 -->
+        <div id="calculator-overlay" class="absolute inset-0 -z-10"></div>
     </div>
 
     <script>
-/**
- * ============================================
- * 問題データ
- * ============================================
- */
 const problemData = [
     {
         "id": 1,
@@ -256,7 +330,7 @@ const problemData = [
     {
         "id": 3,
         "category": "基本情報 R5/06",
-        "question": "逆ポーランド表記法(後置表記法)で、\"EF-G÷ CD-AB+÷+\" と表現される式はどれか。",
+        "question": "逆ポーランド表記法(後置表記法)で、\"EF-G/ CD-AB+++\" と表現される式はどれか。",
         "options": [
             "((A+B)+(C-D)) ÷ G-(E ÷ F)",
             "((A+B) ÷ (C-D))+G ÷ (E-F)",
@@ -1181,29 +1255,32 @@ const problemData = [
 
 /**
  * ============================================
- * アプリケーションロジック
+ * アプリケーションロジック (V4)
  * ============================================
  */
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- 状態管理の変数 ---
-    let allProblems = [...problemData]; // すべての問題
-    let currentQuizProblems = []; // 現在のクイズセッションの問題リスト
-    let currentIndex = 0; // 現在の問題番号 (0-indexed)
-    let currentMode = 'sequential'; // 'sequential', 'random', 'infinite'
-    let score = 0; // 正解数
-    let isAnswered = false; // 回答済みかどうかのフラグ
-    let statsData = {}; // 問題ごとの成績データ
-    const STATS_STORAGE_KEY = 'feAnkiAppStats';
+    let allProblems = [...problemData];
+    let currentQuizProblems = [];
+    let currentIndex = 0;
+    let currentMode = 'sequential';
+    let score = 0;
+    let isAnswered = false;
+    let statsData = {};
+    const STATS_STORAGE_KEY = 'feAnkiAppStats_v4'; // バージョンアップ
+    let problemHistory = [];
+    let currentActiveScreen = 'home';
+    let isTransitioning = false;
 
     // --- DOM要素の取得 ---
+    const appContainer = document.getElementById('app-container');
     const screens = {
         home: document.getElementById('home-screen'),
         quiz: document.getElementById('quiz-screen'),
         result: document.getElementById('result-screen'),
     };
-
-    const homeButtons = document.querySelectorAll('#home-screen button');
+    const homeButtons = document.querySelectorAll('#home-screen button[data-mode]');
     
     const quizElements = {
         category: document.getElementById('quiz-category'),
@@ -1216,6 +1293,9 @@ document.addEventListener('DOMContentLoaded', () => {
         feedbackExplanation: document.getElementById('feedback-explanation'),
         nextButton: document.getElementById('next-button'),
         homeButton: document.getElementById('home-button'),
+        prevButton: document.getElementById('prev-button'),
+        toggleExplanationButton: document.getElementById('toggle-explanation-button'),
+        calculatorButton: document.getElementById('calculator-button'),
     };
 
     const resultElements = {
@@ -1225,48 +1305,39 @@ document.addEventListener('DOMContentLoaded', () => {
         backToHomeButton: document.getElementById('back-to-home-button'),
     };
 
-    // --- localStorage関連の関数 ---
+    const calculator = {
+        modal: document.getElementById('calculator-modal'),
+        overlay: document.getElementById('calculator-overlay'),
+        display: document.getElementById('calc-display'),
+        keys: document.querySelector('.grid.grid-cols-4'),
+        state: {
+            displayValue: '0',
+            firstOperand: null,
+            waitingForSecondOperand: false,
+            operator: null,
+        }
+    };
 
-    /**
-     * localStorageから成績データを読み込む
-     */
+    // --- localStorage関連 ---
     function loadStats() {
         const data = localStorage.getItem(STATS_STORAGE_KEY);
         statsData = data ? JSON.parse(data) : {};
     }
-
-    /**
-     * localStorageに成績データを保存する
-     */
     function saveStats() {
         localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify(statsData));
     }
-
-    /**
-     * 問題の成績を更新する
-     * @param {number} problemId 問題ID
-     * @param {boolean} isCorrect 正解したかどうか
-     */
     function updateStats(problemId, isCorrect) {
         if (!statsData[problemId]) {
             statsData[problemId] = { correct: 0, total: 0 };
         }
         statsData[problemId].total++;
-        if (isCorrect) {
-            statsData[problemId].correct++;
-        }
+        if (isCorrect) statsData[problemId].correct++;
         saveStats();
     }
 
     // --- ユーティリティ関数 ---
-
-    /**
-     * 配列をランダムにシャッフルする (Fisher-Yatesアルゴリズム)
-     * @param {Array} array シャッフルする配列
-     * @returns {Array} シャッフルされた新しい配列
-     */
     function shuffleArray(array) {
-        const newArray = [...array]; // 元の配列をコピー
+        const newArray = [...array];
         for (let i = newArray.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
@@ -1275,28 +1346,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * 指定された画面に切り替える
-     * @param {string} screenName 'home', 'quiz', 'result' のいずれか
+     * 画面をスムーズに切り替える
      */
     function switchScreen(screenName) {
-        Object.values(screens).forEach(screen => {
-            screen.classList.remove('active');
-        });
-        if (screens[screenName]) {
-            screens[screenName].classList.add('active');
+        if (isTransitioning || currentActiveScreen === screenName) return;
+        isTransitioning = true;
+
+        const oldScreen = screens[currentActiveScreen];
+        const newScreen = screens[screenName];
+
+        if (oldScreen) {
+            oldScreen.classList.remove('active');
         }
+        
+        if (newScreen) {
+            newScreen.classList.add('active');
+            currentActiveScreen = screenName;
+        }
+
+        setTimeout(() => {
+            isTransitioning = false;
+        }, 300); // CSSのtransition durationと合わせる
     }
 
     // --- メインロジック関数 ---
 
     /**
      * クイズセッションを開始する
-     * @param {string} mode 'sequential', 'random', 'infinite'
      */
     function startQuiz(mode) {
         currentMode = mode;
         currentIndex = 0;
         score = 0;
+        problemHistory = [];
 
         if (mode === 'sequential') {
             currentQuizProblems = [...allProblems];
@@ -1304,8 +1386,8 @@ document.addEventListener('DOMContentLoaded', () => {
             currentQuizProblems = shuffleArray(allProblems); 
         }
 
-        displayQuestion();
         switchScreen('quiz');
+        setTimeout(displayQuestion, 50);
     }
 
     /**
@@ -1313,55 +1395,87 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function displayQuestion() {
         isAnswered = false;
+        
+        // [★修正] 解説エリアを閉じる（CSS連動）
+        toggleFeedbackArea(false);
+        
+        quizElements.nextButton.classList.add('opacity-0', 'invisible');
+
+        if (currentMode === 'infinite' && currentIndex >= currentQuizProblems.length) {
+            currentIndex = 0;
+            currentQuizProblems = shuffleArray(allProblems);
+            if (!currentQuizProblems.length) {
+                goToHome();
+                return;
+            }
+        }
+
         const problem = currentQuizProblems[currentIndex];
         
         if (!problem) {
-            console.error("問題が見つかりません。");
             showResult();
             return;
         }
 
-        // 過去の正答率を表示
+        const contentAreas = [quizElements.question, quizElements.optionsContainer];
+        contentAreas.forEach(area => {
+            area.style.opacity = '0';
+        });
+
+        // データをセット
         const stats = statsData[problem.id];
-        if (stats && stats.total > 0) {
-            const percentage = Math.round((stats.correct / stats.total) * 100);
-            quizElements.stats.textContent = `過去の正答率: ${percentage}% (${stats.correct}/${stats.total})`;
-        } else {
-            quizElements.stats.textContent = '初挑戦の問題です';
-        }
-        quizElements.stats.style.display = 'block';
+        quizElements.stats.textContent = (stats && stats.total > 0)
+            ? `過去正答率: ${Math.round((stats.correct / stats.total) * 100)}% (${stats.correct}/${stats.total})`
+            : '初挑戦の問題です';
 
         quizElements.category.textContent = problem.category;
         
         if (currentMode !== 'infinite') {
             quizElements.progress.textContent = `${currentIndex + 1} / ${currentQuizProblems.length}`;
-            quizElements.progress.style.display = 'inline';
+            quizElements.progress.classList.remove('hidden');
         } else {
-            quizElements.progress.style.display = 'none';
+            quizElements.progress.classList.add('hidden');
         }
         
-        quizElements.question.textContent = problem.question;
+        quizElements.question.innerHTML = problem.question.replace(/\n/g, '<br>');
         quizElements.optionsContainer.innerHTML = '';
         
-        const options = problem.options; 
         const prefixes = ["ア", "イ", "ウ", "エ"];
-
-        options.forEach((optionText, index) => {
+        problem.options.forEach((optionText, index) => {
             const button = document.createElement('button');
-            button.textContent = prefixes[index] + ". " + optionText;
-            button.className = 'btn btn-option w-full';
+            button.className = 'btn-option w-full flex items-center text-left p-4 border-2 border-gray-300 rounded-lg';
+            
+            button.innerHTML = `
+                <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-gray-200 text-gray-700 font-bold rounded-full mr-4">${prefixes[index]}</span>
+                <span class="flex-1 text-gray-800">${optionText}</span>
+            `;
+            
             button.addEventListener('click', () => handleOptionClick(optionText, problem.correctAnswer));
             quizElements.optionsContainer.appendChild(button);
         });
 
-        quizElements.feedback.classList.add('hidden');
-        quizElements.nextButton.classList.add('hidden');
+        quizElements.prevButton.disabled = (problemHistory.length === 0 || currentMode === 'infinite');
+
+        // コンテンツをフェードイン
+        setTimeout(() => {
+            contentAreas.forEach(area => {
+                area.style.transition = 'opacity 0.3s ease-out';
+                area.style.opacity = '1';
+            });
+            
+            // 選択肢をスタッガーアニメーションで表示
+            const buttons = quizElements.optionsContainer.querySelectorAll('.btn-option');
+            buttons.forEach((btn, index) => {
+                btn.style.setProperty('--delay', `${index * 80}ms`);
+                requestAnimationFrame(() => {
+                    btn.classList.add('visible');
+                });
+            });
+        }, 100);
     }
 
     /**
      * 選択肢がクリックされた時の処理
-     * @param {string} selectedAnswer ユーザーが選んだ答え
-     * @param {string} correctAnswer 正しい答え
      */
     function handleOptionClick(selectedAnswer, correctAnswer) {
         if (isAnswered) return;
@@ -1372,23 +1486,23 @@ document.addEventListener('DOMContentLoaded', () => {
         let isCorrect = false;
 
         if (selectedAnswer === correctAnswer) {
-            quizElements.feedbackResult.textContent = '正解！';
-            quizElements.feedbackResult.style.color = '#15803d'; // green-700
+            quizElements.feedbackResult.innerHTML = '<span class="text-green-600">正解！</span>';
             score++;
             isCorrect = true;
         } else {
-            quizElements.feedbackResult.textContent = '不正解...';
-            quizElements.feedbackResult.style.color = '#b91c1c'; // red-700
+            quizElements.feedbackResult.innerHTML = '<span class="text-red-600">不正解...</span> (正解は「' + correctAnswer + '」)';
         }
 
-        updateStats(problem.id, isCorrect); // 成績を更新
+        updateStats(problem.id, isCorrect);
 
-        quizElements.feedbackExplanation.textContent = problem.explanation;
-        quizElements.feedback.classList.remove('hidden');
+        quizElements.feedbackExplanation.innerHTML = problem.explanation.replace(/\n/g, '<br>');
+        
+        // [★修正] 解説をスライドダウン表示（CSS連動）
+        toggleFeedbackArea(true); 
 
         buttons.forEach(button => {
             button.disabled = true;
-            const optionTextOnly = button.textContent.substring(button.textContent.indexOf(". ") + 2);
+            const optionTextOnly = button.querySelector('.flex-1').textContent;
             
             if (optionTextOnly === correctAnswer) {
                 button.classList.add('correct');
@@ -1397,33 +1511,68 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        quizElements.nextButton.classList.remove('hidden');
+        quizElements.nextButton.classList.remove('opacity-0', 'invisible');
     }
 
     /**
-     * 「次へ」ボタンが押された時の処理
+     * 「次へ」ボタン
      */
     function nextQuestion() {
+        problemHistory.push(currentIndex);
         currentIndex++;
-
-        if (currentIndex < currentQuizProblems.length) {
-            displayQuestion();
-        } else {
-            if (currentMode !== 'infinite') {
-                showResult();
-            } else {
-                currentIndex = 0;
-                currentQuizProblems = shuffleArray(allProblems); 
-                displayQuestion();
-            }
-        }
+        displayQuestion();
     }
 
     /**
-     * 結果画面を表示する
+     * 「前へ」ボタン
+     */
+    function prevQuestion() {
+        if (problemHistory.length === 0 || currentMode === 'infinite') return;
+        currentIndex = problemHistory.pop();
+        displayQuestion();
+    }
+
+    /**
+     * [★ 修正]
+     * 解説エリアの表示/非表示をトグル (CSSの .visible クラスを制御するだけ)
+     */
+    function toggleFeedbackArea(forceShow = null) {
+        const area = quizElements.feedback;
+        const isVisible = area.classList.contains('visible');
+        const show = forceShow !== null ? forceShow : !isVisible;
+
+        if (show) {
+            area.classList.add('visible');
+        } else {
+            area.classList.remove('visible');
+        }
+    }
+    
+    /**
+     * 「解説」ボタン
+     */
+    function toggleExplanation() {
+        const problem = currentQuizProblems[currentIndex];
+        if (!problem) return;
+
+        if (!isAnswered) {
+             quizElements.feedbackExplanation.innerHTML = problem.explanation.replace(/\n/g, '<br>');
+             quizElements.feedbackResult.innerHTML = '';
+        }
+        
+        toggleFeedbackArea(); // 表示/非表示をトグル
+    }
+
+
+    /**
+     * 結果画面を表示
      */
     function showResult() {
-        resultElements.summary.textContent = `${currentQuizProblems.length}問中 ${score}問正解しました。`;
+        if (currentQuizProblems.length > 0) {
+            resultElements.summary.textContent = `${currentQuizProblems.length}問中 ${score}問正解しました。`;
+        } else {
+            resultElements.summary.textContent = "問題がありませんでした。";
+        }
         
         const modeMap = {
             'sequential': '順番に',
@@ -1438,8 +1587,135 @@ document.addEventListener('DOMContentLoaded', () => {
      * ホーム画面に戻る
      */
     function goToHome() {
+        problemHistory = [];
         switchScreen('home');
     }
+
+    // --- 電卓ロジック ---
+    function toggleCalculator(show = true) {
+        const modal = calculator.modal;
+        if (show) {
+            modal.classList.remove('invisible', 'opacity-0');
+            resetCalculator();
+        } else {
+            modal.classList.add('invisible', 'opacity-0');
+        }
+    }
+
+    function resetCalculator() {
+        calculator.state.displayValue = '0';
+        calculator.state.firstOperand = null;
+        calculator.state.waitingForSecondOperand = false;
+        calculator.state.operator = null;
+        updateCalcDisplay();
+    }
+
+    function updateCalcDisplay() {
+        let display = calculator.state.displayValue;
+        if (display.length > 12) {
+            display = parseFloat(display).toExponential(6);
+        }
+        calculator.display.textContent = display;
+    }
+
+    // [★ 修正] 電卓のロジック (alert() 削除)
+    function handleCalcInput(key) {
+        const { state } = calculator;
+
+        // "Error" 表示中は "AC" または "C" 以外受け付けない
+        if (calculator.display.textContent === "Error" && !['AC', 'C'].includes(key)) {
+            return;
+        }
+
+        if (!isNaN(parseInt(key))) { // 数字
+            if (state.displayValue.length > 15) return;
+            if (state.waitingForSecondOperand) {
+                state.displayValue = key;
+                state.waitingForSecondOperand = false;
+            } else {
+                state.displayValue = state.displayValue === '0' ? key : state.displayValue + key;
+            }
+            updateCalcDisplay();
+        } else if (key === '.') { // 小数点
+            if (state.displayValue.length > 15) return;
+            if (state.waitingForSecondOperand) {
+                state.displayValue = '0.';
+                state.waitingForSecondOperand = false;
+            } else if (!state.displayValue.includes('.')) {
+                state.displayValue += '.';
+            }
+            updateCalcDisplay();
+        } else if (['+', '-', '*', '/'].includes(key)) { // 演算子
+            if (state.firstOperand === null && !isNaN(parseFloat(state.displayValue))) {
+                state.firstOperand = parseFloat(state.displayValue);
+            } else if (state.operator) {
+                // 0除算チェック
+                if (state.operator === '/' && parseFloat(state.displayValue) === 0) {
+                    console.error("Division by zero attempted");
+                    calculator.display.textContent = "Error";
+                    state.firstOperand = null;
+                    state.operator = null;
+                    state.waitingForSecondOperand = false;
+                    state.displayValue = '0';
+                    return; // ここで処理終了
+                }
+                const result = performCalculation();
+                state.displayValue = `${parseFloat(result.toFixed(7))}`;
+                state.firstOperand = result;
+            }
+            state.waitingForSecondOperand = true;
+            state.operator = key;
+            updateCalcDisplay();
+        } else if (key === '=') { // イコール
+            if (state.firstOperand !== null && state.operator && !state.waitingForSecondOperand) {
+                // 0除算チェック
+                if (state.operator === '/' && parseFloat(state.displayValue) === 0) {
+                    console.error("Division by zero attempted");
+                    calculator.display.textContent = "Error";
+                    state.firstOperand = null;
+                    state.operator = null;
+                    state.waitingForSecondOperand = false;
+                    state.displayValue = '0';
+                    return; // ここで処理終了
+                }
+
+                const result = performCalculation();
+                state.displayValue = `${parseFloat(result.toFixed(7))}`;
+                state.firstOperand = null;
+                state.operator = null;
+                state.waitingForSecondOperand = false;
+                updateCalcDisplay();
+            }
+        } else if (key === 'AC') { // オールクリア
+            resetCalculator();
+        } else if (key === 'C') { // クリア
+            if (calculator.display.textContent === "Error") {
+                resetCalculator(); // Error表示中はACと同じ動作
+            } else {
+                state.displayValue = '0';
+                if (state.waitingForSecondOperand) {
+                    // 演算子入力待ち状態（例: 5 + ）でCを押したら、ディスプレイだけ0にする
+                }
+                updateCalcDisplay();
+            }
+        }
+    }
+    
+    // [★ 修正] 0除算ロジックを handleCalcInput に移動したため、ここはシンプルに
+    function performCalculation() {
+        const { firstOperand, operator, displayValue } = calculator.state;
+        const secondOperand = parseFloat(displayValue);
+
+        if (operator === '+') return firstOperand + secondOperand;
+        if (operator === '-') return firstOperand - secondOperand;
+        if (operator === '*') return firstOperand * secondOperand;
+        if (operator === '/') {
+             return firstOperand / secondOperand; // 0除算チェックは呼び出し元
+        }
+        
+        return secondOperand;
+    }
+    // [★ 修正ここまで]
 
     // --- イベントリスナーの登録 ---
     homeButtons.forEach(button => {
@@ -1450,16 +1726,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     quizElements.nextButton.addEventListener('click', nextQuestion);
+    quizElements.prevButton.addEventListener('click', prevQuestion);
     quizElements.homeButton.addEventListener('click', goToHome);
+    quizElements.toggleExplanationButton.addEventListener('click', toggleExplanation);
+    quizElements.calculatorButton.addEventListener('click', () => toggleCalculator(true));
 
     resultElements.restartButton.addEventListener('click', () => startQuiz(currentMode));
     resultElements.backToHomeButton.addEventListener('click', goToHome);
 
-    // --- アプリの初期化 ---
-    loadStats(); // localStorageからデータを読み込む
-    switchScreen('home');
+    calculator.overlay.addEventListener('click', () => toggleCalculator(false));
+    calculator.keys.addEventListener('click', (event) => {
+        const key = event.target.closest('button');
+        if (key) {
+            handleCalcInput(key.dataset.key);
+        }
+    });
 
+    // --- アプリの初期化 ---
+    loadStats();
 });
     </script>
 </body>
 </html>
+
