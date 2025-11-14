@@ -8,52 +8,66 @@
     <style>
         /* 簡易的なTailwind CSS風のユーティリティクラス（CDNの代わり） */
         /* 基本スタイル */
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #6b7281;
+            --accent-color: #eab308;
+            --bg-color: #f3f4f6;
+            --text-color: #374151;
+            --card-bg: #ffffff;
+            --correct-bg: #dcfce7;
+            --correct-border: #22c55e;
+            --incorrect-bg: #fee2e2;
+            --incorrect-border: #f87171;
+        }
+
         body {
             margin: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: #f3f4f6; /* bg-gray-100 */
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            -webkit-tap-highlight-color: transparent; /* スマホでのタップ時のハイライトを無効化 */
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
         }
 
         .min-h-screen { min-height: 100vh; }
         .p-4 { padding: 1rem; }
         .font-sans { font-family: sans-serif; }
         .text-center { text-align: center; }
+        .mb-2 { margin-bottom: 0.5rem; }
         .mb-4 { margin-bottom: 1rem; }
         .mb-6 { margin-bottom: 1.5rem; }
         .mb-8 { margin-bottom: 2rem; }
         .mt-6 { margin-top: 1.5rem; }
-        .space-y-3 > * + * { margin-top: 0.75rem; }
+        .space-y-4 > * + * { margin-top: 1rem; }
         .w-full { width: 100%; }
         .float-right { float: right; }
         .flex { display: flex; }
         .justify-between { justify-content: space-between; }
+        .items-center { align-items: center; }
         .rounded-lg { border-radius: 0.5rem; }
         .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
 
         /* テキスト */
-        .text-2xl { font-size: 1.5rem; }
-        .text-xl { font-size: 1.25rem; }
-        .text-lg { font-size: 1.125rem; }
-        .text-sm { font-size: 0.875rem; }
+        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
         .font-bold { font-weight: 700; }
         .font-semibold { font-weight: 600; }
-        .text-gray-100 { color: #f3f4f6; }
         .text-gray-500 { color: #6b7281; }
         .text-gray-600 { color: #4b5563; }
         .text-gray-700 { color: #374151; }
         .text-white { color: #ffffff; }
-
-        /* 背景 */
-        .bg-gray-100 { background-color: #f3f4f6; }
-        .bg-blue-500 { background-color: #3b82f6; }
-        .bg-gray-500 { background-color: #6b7281; }
-        .bg-green-500 { background-color: #22c55e; }
-        .bg-red-500 { background-color: #ef4444; }
-        .bg-yellow-500 { background-color: #eab308; }
+        .text-right { text-align: right; }
 
         /* コンポーネント */
         .card {
-            background-color: white;
+            background-color: var(--card-bg);
             border-radius: 0.75rem; /* rounded-xl */
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             padding: 1.5rem;
@@ -62,64 +76,52 @@
         }
 
         .btn {
-            padding: 0.75rem 1.25rem;
+            padding: 0.85rem 1.5rem;
             border: none;
             border-radius: 0.5rem; /* rounded-lg */
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-sizing: border-box; /* paddingを含めてwidth: 100%にするため */
+            transition: background-color 0.2s ease, transform 0.1s ease;
             text-align: center;
+            display: block; /* w-fullを確実に効かせるため */
         }
 
         .btn:active {
             transform: translateY(1px);
-            opacity: 0.9;
+            opacity: 0.95;
         }
 
         /* ボタン色 */
-        .btn-primary {
-            background-color: #3b82f6; /* bg-blue-500 */
-            color: white;
-        }
-        .btn-secondary {
-            background-color: #6b7281; /* bg-gray-500 */
-            color: white;
-        }
-        .btn-accent {
-            background-color: #eab308; /* bg-yellow-500 */
-            color: white;
-        }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-secondary { background-color: var(--secondary-color); color: white; }
+        .btn-accent { background-color: var(--accent-color); color: white; }
 
         /* 選択肢ボタン */
         .btn-option {
-            background-color: #f3f4f6; /* bg-gray-100 */
+            background-color: #f9fafb; /* bg-gray-50 */
             color: #374151; /* text-gray-700 */
             border: 1px solid #d1d5db; /* border-gray-300 */
             text-align: left;
+            padding: 1rem;
+            font-weight: 500;
         }
-        .btn-option:hover {
-            background-color: #e5e7eb; /* bg-gray-200 */
-        }
+        .btn-option:hover { background-color: #f3f4f6; /* bg-gray-100 */ }
 
         /* 選択肢の回答後スタイル */
         .btn-option.correct {
-            background-color: #d1fae5; /* bg-green-100 */
-            border-color: #10b981; /* border-green-500 */
-            color: #065f46; /* text-green-800 */
+            background-color: var(--correct-bg);
+            border-color: var(--correct-border);
+            color: #14532d; /* text-green-900 */
             font-weight: 700;
         }
         .btn-option.incorrect {
-            background-color: #fee2e2; /* bg-red-100 */
-            border-color: #f87171; /* border-red-400 */
+            background-color: var(--incorrect-bg);
+            border-color: var(--incorrect-border);
             color: #991b1b; /* text-red-800 */
-            opacity: 0.7;
+            opacity: 0.8;
         }
-        .btn-option:disabled {
-            cursor: not-allowed;
-        }
-
+        .btn-option:disabled { cursor: not-allowed; }
 
         .badge {
             display: inline-block;
@@ -131,22 +133,26 @@
             font-weight: 600;
         }
 
-        .min-h-\[5em\] {
-            min-height: 5em;
+        /* 問題文のエリア */
+        #question-area {
+            line-height: 1.7;
+            min-height: 6em;
+        }
+        
+        /* 解説文のエリア */
+        #feedback-explanation {
+            line-height: 1.6;
+            background-color: #f3f4f6;
+            padding: 1rem;
+            border-radius: 0.5rem;
         }
 
         /* 画面切り替え */
-        .screen {
-            display: none; /* デフォルトは非表示 */
-        }
-        .screen.active {
-            display: block; /* activeクラスで表示 */
-        }
+        .screen { display: none; }
+        .screen.active { display: block; }
 
         /* 汎用クラス */
-        .hidden {
-            display: none !important;
-        }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -161,34 +167,34 @@
                 <p class="text-center text-gray-600 mb-8">モードを選んでください</p>
                 
                 <!-- モード選択ボタン -->
-                <button data-mode="sequential" class="btn btn-primary w-full mb-4">
-                    順番にスタート
-                </button>
-                <button data-mode="random" class="btn btn-secondary w-full mb-4">
-                    ランダムでスタート
-                </button>
-                <button data-mode="infinite" class="btn btn-accent w-full">
-                    ランダム無限モード
-                </button>
+                <div class="space-y-4">
+                    <button data-mode="sequential" class="btn btn-primary w-full">順番にスタート</button>
+                    <button data-mode="random" class="btn btn-secondary w-full">ランダムでスタート</button>
+                    <button data-mode="infinite" class="btn btn-accent w-full">ランダム無限モード</button>
+                </div>
             </div>
         </div>
 
         <!-- 画面2: クイズ画面 -->
         <div id="quiz-screen" class="screen">
             <div class="card">
-                <!-- 問題カテゴリと番号 -->
-                <div class="mb-4">
+                <!-- ヘッダー情報 -->
+                <div class="flex justify-between items-center mb-2">
                     <span id="quiz-category" class="badge">カテゴリ</span>
-                    <span id="quiz-progress" class="text-gray-500 text-sm float-right">1 / 10</span>
+                    <span id="quiz-progress" class="text-gray-500 text-sm">1 / 10</span>
+                </div>
+                <!-- 正答率表示エリア -->
+                <div id="quiz-stats" class="text-sm text-gray-500 mb-4 text-right">
+                    <!-- ここに正答率が動的に表示されます -->
                 </div>
 
                 <!-- 問題文 -->
-                <div id="question-area" class="text-lg font-semibold mb-6 min-h-[5em]">
+                <div id="question-area" class="text-lg font-semibold mb-6">
                     ここに問題文が表示されます...
                 </div>
 
                 <!-- 選択肢コンテナ -->
-                <div id="options-container" class="space-y-3 mb-6">
+                <div id="options-container" class="space-y-4 mb-6">
                     <!-- 選択肢ボタンは JavaScript によって動的に生成されます -->
                 </div>
 
@@ -197,7 +203,7 @@
                     <div id="feedback-result" class="text-xl font-bold mb-2">
                         <!-- '正解！' または '不正解...' が表示されます -->
                     </div>
-                    <div id="feedback-explanation" class="text-gray-700 bg-gray-100 p-3 rounded-lg">
+                    <div id="feedback-explanation" class="text-gray-700">
                         <!-- ここに解説文が表示されます -->
                     </div>
                 </div>
@@ -215,17 +221,16 @@
             <div class="card text-center">
                 <h2 class="text-2xl font-bold mb-4">お疲れ様でした！</h2>
                 <p id="result-summary" class="text-lg mb-8">10問中 8問正解しました。</p>
-                <button id="restart-button" class="btn btn-primary w-full mb-4">
-                    もう一度 (
-                    <span id="restart-mode-text"></span>
-                    )
-                </button>
-                <button id="back-to-home-button" class="btn btn-secondary w-full">
-                    ホームに戻る
-                </button>
+                <div class="space-y-4">
+                    <button id="restart-button" class="btn btn-primary w-full">
+                        もう一度 (<span id="restart-mode-text"></span>)
+                    </button>
+                    <button id="back-to-home-button" class="btn btn-secondary w-full">
+                        ホームに戻る
+                    </button>
+                </div>
             </div>
         </div>
-
     </div>
 
     <script>
@@ -1188,6 +1193,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentMode = 'sequential'; // 'sequential', 'random', 'infinite'
     let score = 0; // 正解数
     let isAnswered = false; // 回答済みかどうかのフラグ
+    let statsData = {}; // 問題ごとの成績データ
+    const STATS_STORAGE_KEY = 'feAnkiAppStats';
 
     // --- DOM要素の取得 ---
     const screens = {
@@ -1201,6 +1208,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const quizElements = {
         category: document.getElementById('quiz-category'),
         progress: document.getElementById('quiz-progress'),
+        stats: document.getElementById('quiz-stats'),
         question: document.getElementById('question-area'),
         optionsContainer: document.getElementById('options-container'),
         feedback: document.getElementById('feedback-area'),
@@ -1216,6 +1224,39 @@ document.addEventListener('DOMContentLoaded', () => {
         restartModeText: document.getElementById('restart-mode-text'),
         backToHomeButton: document.getElementById('back-to-home-button'),
     };
+
+    // --- localStorage関連の関数 ---
+
+    /**
+     * localStorageから成績データを読み込む
+     */
+    function loadStats() {
+        const data = localStorage.getItem(STATS_STORAGE_KEY);
+        statsData = data ? JSON.parse(data) : {};
+    }
+
+    /**
+     * localStorageに成績データを保存する
+     */
+    function saveStats() {
+        localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify(statsData));
+    }
+
+    /**
+     * 問題の成績を更新する
+     * @param {number} problemId 問題ID
+     * @param {boolean} isCorrect 正解したかどうか
+     */
+    function updateStats(problemId, isCorrect) {
+        if (!statsData[problemId]) {
+            statsData[problemId] = { correct: 0, total: 0 };
+        }
+        statsData[problemId].total++;
+        if (isCorrect) {
+            statsData[problemId].correct++;
+        }
+        saveStats();
+    }
 
     // --- ユーティリティ関数 ---
 
@@ -1257,14 +1298,12 @@ document.addEventListener('DOMContentLoaded', () => {
         currentIndex = 0;
         score = 0;
 
-        // 問題リストを準備
         if (mode === 'sequential') {
             currentQuizProblems = [...allProblems];
         } else { // 'random' または 'infinite'
             currentQuizProblems = shuffleArray(allProblems); 
         }
 
-        // 最初の問題を表示
         displayQuestion();
         switchScreen('quiz');
     }
@@ -1273,7 +1312,7 @@ document.addEventListener('DOMContentLoaded', () => {
      * 現在の問題を画面に表示する
      */
     function displayQuestion() {
-        isAnswered = false; // 回答フラグをリセット
+        isAnswered = false;
         const problem = currentQuizProblems[currentIndex];
         
         if (!problem) {
@@ -1281,6 +1320,16 @@ document.addEventListener('DOMContentLoaded', () => {
             showResult();
             return;
         }
+
+        // 過去の正答率を表示
+        const stats = statsData[problem.id];
+        if (stats && stats.total > 0) {
+            const percentage = Math.round((stats.correct / stats.total) * 100);
+            quizElements.stats.textContent = `過去の正答率: ${percentage}% (${stats.correct}/${stats.total})`;
+        } else {
+            quizElements.stats.textContent = '初挑戦の問題です';
+        }
+        quizElements.stats.style.display = 'block';
 
         quizElements.category.textContent = problem.category;
         
@@ -1320,15 +1369,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const problem = currentQuizProblems[currentIndex];
         const buttons = quizElements.optionsContainer.querySelectorAll('button');
+        let isCorrect = false;
 
         if (selectedAnswer === correctAnswer) {
             quizElements.feedbackResult.textContent = '正解！';
             quizElements.feedbackResult.style.color = '#15803d'; // green-700
             score++;
+            isCorrect = true;
         } else {
             quizElements.feedbackResult.textContent = '不正解...';
             quizElements.feedbackResult.style.color = '#b91c1c'; // red-700
         }
+
+        updateStats(problem.id, isCorrect); // 成績を更新
 
         quizElements.feedbackExplanation.textContent = problem.explanation;
         quizElements.feedback.classList.remove('hidden');
@@ -1372,12 +1425,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function showResult() {
         resultElements.summary.textContent = `${currentQuizProblems.length}問中 ${score}問正解しました。`;
         
-        let modeText = '';
-        if (currentMode === 'sequential') modeText = '順番に';
-        if (currentMode === 'random') modeText = 'ランダムで';
-        if (currentMode === 'infinite') modeText = '無限モードで';
-
-        resultElements.restartModeText.textContent = modeText;
+        const modeMap = {
+            'sequential': '順番に',
+            'random': 'ランダムで',
+            'infinite': '無限モードで'
+        };
+        resultElements.restartModeText.textContent = modeMap[currentMode] || '';
         switchScreen('result');
     }
 
@@ -1389,25 +1442,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- イベントリスナーの登録 ---
-
     homeButtons.forEach(button => {
         button.addEventListener('click', () => {
             const mode = button.getAttribute('data-mode');
-            if (mode) {
-                startQuiz(mode);
-            }
+            if (mode) startQuiz(mode);
         });
     });
 
     quizElements.nextButton.addEventListener('click', nextQuestion);
     quizElements.homeButton.addEventListener('click', goToHome);
 
-    resultElements.restartButton.addEventListener('click', () => {
-        startQuiz(currentMode);
-    });
+    resultElements.restartButton.addEventListener('click', () => startQuiz(currentMode));
     resultElements.backToHomeButton.addEventListener('click', goToHome);
 
     // --- アプリの初期化 ---
+    loadStats(); // localStorageからデータを読み込む
     switchScreen('home');
 
 });
